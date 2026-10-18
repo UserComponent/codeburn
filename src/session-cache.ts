@@ -318,6 +318,7 @@ export const PROVIDER_ENV_VARS: Record<string, string[]> = {
   opencode: ['XDG_DATA_HOME', 'OPENCODE_DATA_DIR', 'OPENCODE_DB_PREFIX'],
   goose: ['XDG_DATA_HOME', 'GOOSE_PATH_ROOT'],
   grok: ['GROK_HOME'],
+  happy: ['HAPPY_HOME_DIR', 'CODEBURN_HAPPY_AGENT_DB'],
   grokbot: ['CODEBURN_GROKBOT_DIR', 'APPDATA'],
   crush: ['XDG_DATA_HOME', 'CRUSH_GLOBAL_DATA', 'LOCALAPPDATA'],
   warp: ['WARP_DB_PATH'],

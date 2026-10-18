@@ -49,6 +49,7 @@ const FILE_PROVIDERS: Record<string, string[]> = {
   'goose.ts': ['goose'],
   'grok.ts': ['grok'],
   'grokbot.ts': ['grokbot'],
+  'happy.ts': ['happy'],
   'crush.ts': ['crush'],
   'warp.ts': ['warp'],
   'antigravity.ts': ['antigravity'],

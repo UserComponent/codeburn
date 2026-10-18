@@ -625,6 +625,14 @@ const BUILTIN_ALIASES: Record<string, string> = {
   'openclaw-auto':                 'claude-sonnet-4-5',
   'warp-auto-efficient':           'gpt-5.3-codex',
   'warp-auto-powerful':            'claude-opus-4-6',
+  // Happy Agent's own short model ids (`anthropic/<name>`, vendor prefix
+  // stripped by getCanonicalName before this table is consulted).
+  'sonnet-5-5':                    'claude-sonnet-5-5',
+  'opus-5-5':                      'claude-opus-5-5',
+  'haiku-5-5':                     'claude-haiku-5-5',
+  'sonnet-5':                      'claude-sonnet-5',
+  'opus-5':                        'claude-opus-5',
+  'opus-4-8':                      'claude-opus-4-8',
   // `codex-auto-review` is a server-routed alias: rollouts record it in
   // turn_context.model and nothing on disk names the real model. OpenAI moved
   // auto review from GPT-5.4 to GPT-5.6 Luna on 30 Jul 2026 (announcement:
