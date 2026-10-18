@@ -175,10 +175,17 @@ function createParser(source: SessionSource, seenKeys: Set<string>): SessionPars
           if (!timestamp) continue
 
           const tokens = record.tokens ?? {}
-          const inputTokens = safeNonNegativeNumber(tokens.input)
+          const rawInputTokens = safeNonNegativeNumber(tokens.input)
           const outputTokens = safeNonNegativeNumber(tokens.output)
           const cacheReadTokens = safeNonNegativeNumber(tokens.cacheRead)
           const cacheWriteTokens = safeNonNegativeNumber(tokens.cacheWrite)
+          // Happy's tokens.input is the whole prompt, cache reads and writes
+          // included, not just the uncached portion (same convention as
+          // Cline CLI's inputTokens — see cline-cli.ts). Billing it as-is
+          // double-counts every cached token at the full input rate on top
+          // of its cache rate.
+          const cachedTokens = cacheReadTokens + cacheWriteTokens
+          const inputTokens = rawInputTokens >= cachedTokens ? rawInputTokens - cachedTokens : rawInputTokens
           if (inputTokens === 0 && outputTokens === 0 && cacheReadTokens === 0 && cacheWriteTokens === 0) continue
 
           seenKeys.add(deduplicationKey)

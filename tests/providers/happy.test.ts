@@ -173,6 +173,8 @@ skipUnlessSqlite('happy provider', () => {
         finishedAt: 1_790_000_000_000,
         runId: 'run-abc',
         model: 'anthropic/sonnet-5-5',
+        // tokens.input is the WHOLE prompt (cache reads/writes included), so
+        // the uncached remainder here is 13_324 - 13_322 = 2.
         tokens: { input: 13_324, output: 394, cacheRead: 0, cacheWrite: 13_322 },
       })
       insertWorkspace(db, {
@@ -186,7 +188,7 @@ skipUnlessSqlite('happy provider', () => {
     const call = calls[0]!
     expect(call.deduplicationKey).toBe('happy:agent-1:rec-1')
     expect(call.model).toBe('anthropic/sonnet-5-5')
-    expect(call.inputTokens).toBe(13_324)
+    expect(call.inputTokens).toBe(2)
     expect(call.outputTokens).toBe(394)
     expect(call.cacheCreationInputTokens).toBe(13_322)
     expect(call.cacheReadInputTokens).toBe(0)
@@ -196,6 +198,28 @@ skipUnlessSqlite('happy provider', () => {
     expect(call.project).toBe('flex')
     expect(call.workingDirectory).toBe('/workspaces/flex/ticket-1')
     expect(call.timestamp).toBe(new Date(1_790_000_000_000).toISOString())
+  })
+
+  it('bills tokens.input as the whole prompt, not an addition on top of cache tokens (regression)', async () => {
+    // Real row from the live database (codeburn-review.md, 2026-10-18): the
+    // bug priced this at $0.1800 by billing cacheRead+cacheWrite a second
+    // time as plain input; corrected cost is $0.0871.
+    const dbPath = createHappyDb(tmpDir)
+    withTestDb(dbPath, (db) => {
+      insertUsageRecord(db, {
+        recordId: 'rec-1',
+        agentId: 'agent-1',
+        finishedAt: 1_792_112_469_597,
+        model: 'anthropic/opus-5-5',
+        tokens: { input: 23_222, output: 249, cacheRead: 7_085, cacheWrite: 16_135 },
+      })
+    })
+
+    const calls = await collectCalls(dbPath, 'agent-1')
+    expect(calls).toHaveLength(1)
+    const call = calls[0]!
+    expect(call.inputTokens).toBe(23_222 - 7_085 - 16_135)
+    expect(call.costUSD).toBeCloseTo(0.0871, 4)
   })
 
   it('ignores non-inference rows and dedupes repeated record ids', async () => {

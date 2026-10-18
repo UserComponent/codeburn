@@ -37,7 +37,10 @@ only reads four tables:
   (dedup key), `agent_id`, `finished_at`, `kind` (`'inference'` carries
   token counts; `'turn'` and other kinds are ignored), and `record_json`
   (`provider`, `model`, `runId`, `tokens.{input,output,cacheRead,cacheWrite}`,
-  `startedAt`, `finishedAt`).
+  `startedAt`, `finishedAt`). **`tokens.input` is the whole prompt, cache
+  reads and writes included** — the same convention as Cline CLI's
+  `inputTokens` — not the uncached remainder. The parser subtracts
+  `cacheRead + cacheWrite` from it before pricing (see Quirks).
 - `happy_agent_module_workspace_agents` — maps an `agent_id` to the
   workspace it ran in.
 - `happy_agent_module_workspaces` — workspace `name` and `path`.
@@ -75,6 +78,15 @@ at $0 with the usual "no pricing data" warning, same as any other provider.
 
 ## Quirks
 
+- `tokens.input` on every `'inference'` row is the whole prompt, not just
+  the uncached portion: it already includes `cacheRead` and `cacheWrite`.
+  Passing it straight to `calculateCost` alongside the cache fields bills
+  every cached token twice — once as full-price input, again at its cache
+  rate — which overcounted a sampled real-world Happy corpus by about 7x
+  before this was caught. The parser computes
+  `max(0, tokens.input - cacheRead - cacheWrite)` as the billed input
+  token count; `tests/providers/happy.test.ts` pins the exact before/after
+  dollar figures from that corpus as a regression test.
 - The live database is written continuously by the Happy daemon; a
   `SQLITE_BUSY`/`SQLITE_LOCKED` read is treated as "unknown", not "empty",
   and is rethrown to the caller rather than sealing an incomplete scan

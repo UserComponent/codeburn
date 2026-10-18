@@ -505,6 +505,10 @@ export const PROVIDER_PARSE_VERSIONS: Record<string, string> = {
   // Estimated from message text: Grok Bot's local mirror records no tokens.
   // import-guess-est-v1: synced Grok Bot rows with no dollar amount are estimated.
   grokbot: 'estimated-usage-v1-import-guess-est-v1',
+  // cache-inclusive-input-v1: tokens.input is the whole prompt (cache reads
+  // and writes included), not the uncached remainder; cached calls from
+  // before this fix overcounted cost by billing cache tokens twice.
+  happy: 'cache-inclusive-input-v1',
   // v0-v4 generations, embedded attempt streams, retry accounting, and the
   // version-specific inherited-prefix rules all change cached DSH calls.
   dsh: 'session-formats-v0-v4-attempts-v6',
