@@ -361,7 +361,12 @@ import type { DateRange, ProjectSummary } from './types.js'
 // copilotCredits, and a chat session that also ran on the agent host is left
 // to it. That twin drops calls, so copilot joins
 // PENDING_REDERIVE_PROVIDER_VERSIONS at 75.
-export const DAILY_CACHE_VERSION = 75
+// v76: Happy Agent's tokens.input is the whole prompt, cache reads and writes
+// included, not just the uncached remainder (the same bug as v63's Cline CLI
+// fix), so it was billed again on top of the cache rates. Only input tokens
+// and estimated cost fall; call counts are unchanged, so no
+// PENDING_REDERIVE_PROVIDER_VERSIONS entry is needed.
+export const DAILY_CACHE_VERSION = 76
 const MIN_SUPPORTED_VERSION = 28
 
 /// Providers whose per-day CALL COUNT means something different at
